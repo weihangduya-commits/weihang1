@@ -47,7 +47,7 @@ function LoginForm() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">登录 LinguaFrame</h1>
+            <h1 className="text-xl font-bold">登录 XingXue</h1>
             <p className="text-sm text-mist">登录后继续学习视频和单词</p>
           </div>
         </div>
