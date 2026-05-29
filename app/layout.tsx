@@ -3,8 +3,8 @@ import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "XingXue",
-  description: "XingXue English video learning platform built with Next.js, React, TypeScript, TailwindCSS and Framer Motion."
+  title: "jintianxuexilema111",
+  description: "jintianxuexilema111 English video learning platform built with Next.js, React, TypeScript, TailwindCSS and Framer Motion."
 };
 
 export default function RootLayout({

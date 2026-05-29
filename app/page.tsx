@@ -41,7 +41,7 @@ type SiteSettings = {
 };
 
 const defaultSettings: SiteSettings = {
-  site_name: "XingXue",
+  site_name: "jintianxuexilema111",
   logo_url: "",
   theme_color: "#B7F36B",
   home_title: "选择一个视频开始沉浸学习",

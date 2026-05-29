@@ -1,4 +1,4 @@
-# XingXue English Video Learning MVP
+# jintianxuexilema111 English Video Learning MVP
 
 一个基于 Next.js + React + TypeScript 的英语视频学习网站 MVP。支持示例视频、本地视频、本地字幕、当前字幕跟随、英文/中文/双语字幕切换、0.2x-2x 倍速播放、高亮可点击单词、mock 词典接口、发音、词卡弹窗和 localStorage 生词收藏。
 

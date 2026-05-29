@@ -68,7 +68,7 @@ model DictionaryWord {
 
 model Setting {
   id                    String   @id @default("site")
-  site_name             String   @default("XingXue")
+  site_name             String   @default("jintianxuexilema111")
   logo_url              String   @default("")
   theme_color           String   @default("#B7F36B")
   home_title            String   @default("选择一个视频开始沉浸学习")
