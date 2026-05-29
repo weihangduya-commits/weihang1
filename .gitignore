@@ -8,3 +8,5 @@ dist
 .tools
 prisma/dev.db
 prisma/dev.db-journal
+
+.vercel
