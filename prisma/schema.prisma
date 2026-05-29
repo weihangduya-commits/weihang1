@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String             @id @default(cuid())
+  email            String             @unique
+  password_hash    String
+  role             String             @default("user")
+  created_at       DateTime           @default(now())
+  saved_words      SavedWord[]
+  learning_progress LearningProgress[]
+}
+
+model Video {
+  id                String             @id @default(cuid())
+  title             String
+  description       String             @default("")
+  difficulty        String             @default("Beginner")
+  category          String             @default("教育")
+  video_url         String
+  subtitle_url      String
+  published         Boolean            @default(false)
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @default(now()) @updatedAt
+  learning_progress LearningProgress[]
+}
+
+model SavedWord {
+  id         String   @id @default(cuid())
+  user_id    String
+  word       String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, word])
+}
+
+model LearningProgress {
+  id           String   @id @default(cuid())
+  user_id      String
+  video_id     String
+  current_time Float    @default(0)
+  completed    Boolean  @default(false)
+  updated_at   DateTime @updatedAt
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video        Video    @relation(fields: [video_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, video_id])
+}
+
+model DictionaryWord {
+  id         String   @id @default(cuid())
+  word       String   @unique
+  phonetic   String
+  chinese    String
+  english    String
+  example    String
+  forms      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Setting {
+  id                    String   @id @default("site")
+  site_name             String   @default("LinguaFrame")
+  logo_url              String   @default("")
+  theme_color           String   @default("#B7F36B")
+  home_title            String   @default("选择一个视频开始沉浸学习")
+  home_subtitle         String   @default("用短视频、字幕、词卡和听写练习提升英语理解力。")
+  dark_mode_enabled     Boolean  @default(true)
+  player_help_text      String   @default("使用倍速慢听难句，或加速复习熟悉片段。")
+  updated_at            DateTime @updatedAt
+}
