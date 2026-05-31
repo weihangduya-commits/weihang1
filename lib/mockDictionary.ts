@@ -1,12 +1,13 @@
 import type { WordDefinition } from "@/types";
+import { getKnownChinese } from "@/lib/onlineDictionary";
 import { normalizeWord } from "@/lib/subtitleParser";
 
 const dictionary: Record<string, WordDefinition> = {
   context: {
     word: "context",
-    phonetic: "/ˈkɑːntekst/",
+    phonetic: "/KON-tekst/",
     audioText: "context",
-    chinese: "上下文；语境；背景",
+    chinese: "\u4e0a\u4e0b\u6587\uff1b\u8bed\u5883\uff1b\u80cc\u666f",
     english: "The situation, text, or information around something that helps you understand its meaning.",
     example: "You can guess many new words from the context of the sentence.",
     forms: {
@@ -16,9 +17,9 @@ const dictionary: Record<string, WordDefinition> = {
   },
   curiosity: {
     word: "curiosity",
-    phonetic: "/ˌkjʊriˈɑːsəti/",
+    phonetic: "/kyoor-ee-AH-suh-tee/",
     audioText: "curiosity",
-    chinese: "好奇心；求知欲",
+    chinese: "\u597d\u5947\u5fc3\uff1b\u6c42\u77e5\u6b32",
     english: "A strong desire to know or learn something.",
     example: "Curiosity helps learners notice patterns in a new language.",
     forms: {
@@ -28,9 +29,9 @@ const dictionary: Record<string, WordDefinition> = {
   },
   language: {
     word: "language",
-    phonetic: "/ˈlæŋɡwɪdʒ/",
+    phonetic: "/LANG-gwij/",
     audioText: "language",
-    chinese: "语言；表达方式",
+    chinese: "\u8bed\u8a00\uff1b\u8868\u8fbe\u65b9\u5f0f",
     english: "A system of communication used by a country, community, or group of people.",
     example: "Video gives language a real voice and rhythm.",
     forms: {
@@ -40,9 +41,9 @@ const dictionary: Record<string, WordDefinition> = {
   },
   notice: {
     word: "notice",
-    phonetic: "/ˈnoʊtɪs/",
+    phonetic: "/NOH-tis/",
     audioText: "notice",
-    chinese: "注意到；察觉",
+    chinese: "\u6ce8\u610f\u5230\uff1b\u5bdf\u89c9",
     english: "To become aware of something by seeing, hearing, or feeling it.",
     example: "Try to notice how the speaker connects each word.",
     forms: {
@@ -55,9 +56,9 @@ const dictionary: Record<string, WordDefinition> = {
   },
   rhythm: {
     word: "rhythm",
-    phonetic: "/ˈrɪðəm/",
+    phonetic: "/RITH-uhm/",
     audioText: "rhythm",
-    chinese: "节奏；韵律",
+    chinese: "\u8282\u594f\uff1b\u97f5\u5f8b",
     english: "A regular pattern of sounds, movements, or events.",
     example: "Listening for rhythm makes spoken English easier to follow.",
     forms: {
@@ -67,9 +68,9 @@ const dictionary: Record<string, WordDefinition> = {
   },
   practice: {
     word: "practice",
-    phonetic: "/ˈpræktɪs/",
+    phonetic: "/PRAK-tis/",
     audioText: "practice",
-    chinese: "练习；实践",
+    chinese: "\u7ec3\u4e60\uff1b\u5b9e\u8df5",
     english: "The repeated exercise of an activity in order to improve.",
     example: "Small daily practice is more powerful than rare long sessions.",
     forms: {
@@ -90,7 +91,9 @@ function buildFallbackDefinition(text: string): WordDefinition {
     word,
     phonetic: "",
     audioText: word,
-    chinese: "该词暂未收录到词库，可在后台单词管理中补充释义。",
+    chinese:
+      getKnownChinese(word) ||
+      "\u8be5\u8bcd\u6682\u672a\u6536\u5f55\u5230\u8bcd\u5e93\uff0c\u53ef\u5728\u540e\u53f0\u5355\u8bcd\u7ba1\u7406\u4e2d\u8865\u5145\u91ca\u4e49\u3002",
     english:
       "This word is not in the built-in dictionary yet. Add a full definition in the admin word library.",
     example: `Try to understand "${word}" from the sentence and add your own example later.`,

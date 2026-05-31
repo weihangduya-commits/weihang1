@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMockWordDefinition } from "@/lib/mockDictionary";
-import { fetchOnlineWordDefinition } from "@/lib/onlineDictionary";
+import { fetchOnlineWordDefinition, getKnownChinese } from "@/lib/onlineDictionary";
 import { requireUser } from "@/lib/apiAuth";
 import { prisma } from "@/lib/prisma";
 
@@ -45,11 +45,20 @@ export async function GET(request: Request) {
     });
   }
 
+  const localDefinition = getMockWordDefinition(text);
+
+  if (!localDefinition.english.startsWith("This word is not in the built-in dictionary")) {
+    return NextResponse.json(localDefinition);
+  }
+
   const onlineDefinition = await fetchOnlineWordDefinition(word).catch(() => null);
 
   if (onlineDefinition) {
+    if (getKnownChinese(word)) {
+      onlineDefinition.chinese = getKnownChinese(word);
+    }
     return NextResponse.json(onlineDefinition);
   }
 
-  return NextResponse.json(getMockWordDefinition(text));
+  return NextResponse.json(localDefinition);
 }
