@@ -33,7 +33,12 @@ export async function GET(request: Request) {
       chinese: dictionaryWord.chinese,
       english: dictionaryWord.english,
       example: dictionaryWord.example,
-      forms: JSON.parse(dictionaryWord.forms)
+      forms: {
+        ...JSON.parse(dictionaryWord.forms || "{}"),
+        phrases: dictionaryWord.phrases
+          ? dictionaryWord.phrases.split(",").map((phrase) => phrase.trim()).filter(Boolean)
+          : JSON.parse(dictionaryWord.forms || "{}").phrases ?? []
+      }
     });
   }
 

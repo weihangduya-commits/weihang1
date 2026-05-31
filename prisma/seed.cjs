@@ -9,7 +9,7 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { role: "admin" },
+    update: { role: "admin", disabled: false },
     create: {
       email: adminEmail,
       password_hash: await bcrypt.hash(adminPassword, 12),
@@ -19,13 +19,14 @@ async function main() {
 
   await prisma.video.upsert({
     where: { id: "education-curiosity" },
-    update: { published: true },
+    update: { published: true, status: "published", difficulty: "A1" },
     create: {
       id: "education-curiosity",
       title: "A Short Lesson on Curiosity",
       description: "A short demo lesson for testing subtitles, word cards, and dictation.",
-      difficulty: "Beginner",
+      difficulty: "A1",
       category: "教育",
+      status: "published",
       video_url:
         "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
       subtitle_url: "/sample.vtt",
@@ -35,7 +36,12 @@ async function main() {
 
   await prisma.setting.upsert({
     where: { id: "site" },
-    update: {},
+    update: {
+      site_name: "jintianxuexilema111",
+      home_title: "选择一个视频开始沉浸学习",
+      home_subtitle: "用短视频、字幕、词卡和听写练习提升英语理解力。",
+      player_help_text: "使用倍速慢听难句，或加速复习熟悉片段。"
+    },
     create: { id: "site" }
   });
 
@@ -51,7 +57,8 @@ async function main() {
       forms: JSON.stringify({
         plural: "curiosities",
         phrases: ["spark curiosity", "natural curiosity"]
-      })
+      }),
+      phrases: "spark curiosity, natural curiosity"
     }
   });
 }

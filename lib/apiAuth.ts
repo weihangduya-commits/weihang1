@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { fail } from "@/lib/apiResponse";
 
 export async function requireUser() {
   const session = await getServerSession(authOptions);
@@ -8,7 +8,7 @@ export async function requireUser() {
   if (!session?.user?.id) {
     return {
       session: null,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      response: fail("Unauthorized", 401)
     };
   }
 
@@ -25,7 +25,7 @@ export async function requireAdmin() {
   if (auth.session.user.role !== "admin") {
     return {
       session: null,
-      response: NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      response: fail("Forbidden", 403)
     };
   }
 

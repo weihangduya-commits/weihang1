@@ -22,7 +22,9 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
 }
 
@@ -43,14 +45,69 @@ video::cue {
 
 .admin-input {
   width: 100%;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 0.75rem 1rem;
-  color: white;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
   outline: none;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.admin-input::placeholder {
+  color: rgba(161, 161, 170, 0.85);
 }
 
 .admin-input:focus {
   border-color: rgba(183, 243, 107, 0.65);
+  box-shadow: 0 0 0 3px rgba(183, 243, 107, 0.08);
+}
+
+.admin-input option {
+  background: #09090b;
+  color: white;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.admin-btn:hover {
+  transform: translateY(-1px);
+}
+
+.admin-btn-primary {
+  background: #b7f36b;
+  color: #111827;
+}
+
+.admin-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.admin-btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4e4e7;
+}
+
+.admin-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bg-admin {
+  background:
+    radial-gradient(circle at 14% -10%, rgba(183, 243, 107, 0.14), transparent 30rem),
+    radial-gradient(circle at 90% 8%, rgba(125, 211, 252, 0.1), transparent 26rem),
+    linear-gradient(180deg, #080a10 0%, #0c1018 100%);
+}
+
+.shadow-admin {
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
 }

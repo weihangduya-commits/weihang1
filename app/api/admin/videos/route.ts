@@ -1,33 +1,54 @@
-import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiAuth";
+import { fail, ok } from "@/lib/apiResponse";
+import { saveUploadFile } from "@/lib/storage";
 
-const createVideoSchema = z.object({
+const videoSchema = z.object({
   title: z.string().min(1),
   description: z.string().default(""),
-  difficulty: z.string().default("Beginner"),
+  difficulty: z.enum(["A1", "A2", "B1", "B2", "C1"]).default("A1"),
   category: z.string().min(1),
   videoUrl: z.string().min(1),
-  subtitleUrl: z.string().min(1),
-  published: z.boolean().default(false)
+  subtitleUrl: z.string().optional().default(""),
+  status: z.enum(["published", "draft", "archived"]).default("draft")
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireAdmin();
 
   if (auth.response) {
     return auth.response;
   }
 
+  const url = new URL(request.url);
+  const query = url.searchParams.get("q")?.trim();
+  const status = url.searchParams.get("status");
+  const difficulty = url.searchParams.get("difficulty");
+
   const videos = await prisma.video.findMany({
+    where: {
+      ...(query
+        ? {
+            OR: [
+              { title: { contains: query, mode: "insensitive" } },
+              { category: { contains: query, mode: "insensitive" } }
+            ]
+          }
+        : {}),
+      ...(status && status !== "all" ? { status } : {}),
+      ...(difficulty && difficulty !== "all" ? { difficulty } : {})
+    },
+    include: {
+      subtitles: {
+        select: { id: true, title: true, language: true, file_url: true }
+      },
+      _count: { select: { learning_progress: true } }
+    },
     orderBy: { created_at: "desc" }
   });
 
-  return NextResponse.json(videos);
+  return ok(videos);
 }
 
 export async function POST(request: Request) {
@@ -41,35 +62,29 @@ export async function POST(request: Request) {
 
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
-    const title = String(form.get("title") ?? "");
+    const title = String(form.get("title") ?? "").trim();
     const description = String(form.get("description") ?? "");
-    const difficulty = String(form.get("difficulty") ?? "Beginner");
+    const difficulty = String(form.get("difficulty") ?? "A1");
     const category = String(form.get("category") ?? "教育");
-    const published = form.get("published") === "on";
+    const status = String(form.get("status") ?? "draft");
     const video = form.get("video");
     const subtitle = form.get("subtitle");
 
-    if (!(video instanceof File) || !(subtitle instanceof File) || !title.trim()) {
-      return NextResponse.json({ error: "Missing video, subtitle, or title" }, { status: 400 });
+    if (!(video instanceof File) || !title) {
+      return fail("请填写标题并上传视频文件", 400);
     }
 
-    const uploadId = randomUUID();
-    const uploadDir = path.join(process.cwd(), "public", "uploads", uploadId);
-    await mkdir(uploadDir, { recursive: true });
+    if (!["A1", "A2", "B1", "B2", "C1"].includes(difficulty)) {
+      return fail("难度不合法", 400);
+    }
 
-    const videoExtension = path.extname(video.name) || ".mp4";
-    const subtitleExtension = path.extname(subtitle.name) || ".vtt";
-    const videoName = `video${videoExtension}`;
-    const subtitleName = `subtitle${subtitleExtension}`;
+    const savedVideo = await saveUploadFile(video, "videos", ".mp4");
+    let subtitleUrl = "";
 
-    await writeFile(
-      path.join(uploadDir, videoName),
-      Buffer.from(await video.arrayBuffer())
-    );
-    await writeFile(
-      path.join(uploadDir, subtitleName),
-      Buffer.from(await subtitle.arrayBuffer())
-    );
+    if (subtitle instanceof File && subtitle.size > 0) {
+      const savedSubtitle = await saveUploadFile(subtitle, "subtitles", ".vtt");
+      subtitleUrl = savedSubtitle.url;
+    }
 
     const created = await prisma.video.create({
       data: {
@@ -77,19 +92,20 @@ export async function POST(request: Request) {
         description,
         difficulty,
         category,
-        video_url: `/uploads/${uploadId}/${videoName}`,
-        subtitle_url: `/uploads/${uploadId}/${subtitleName}`,
-        published
+        status,
+        published: status === "published",
+        video_url: savedVideo.url,
+        subtitle_url: subtitleUrl
       }
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return ok(created, "视频已上传", 201);
   }
 
-  const parsed = createVideoSchema.safeParse(await request.json());
+  const parsed = videoSchema.safeParse(await request.json());
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid video payload" }, { status: 400 });
+    return fail("视频数据不合法", 400, parsed.error.flatten());
   }
 
   const created = await prisma.video.create({
@@ -98,11 +114,12 @@ export async function POST(request: Request) {
       description: parsed.data.description,
       difficulty: parsed.data.difficulty,
       category: parsed.data.category,
+      status: parsed.data.status,
       video_url: parsed.data.videoUrl,
       subtitle_url: parsed.data.subtitleUrl,
-      published: parsed.data.published
+      published: parsed.data.status === "published"
     }
   });
 
-  return NextResponse.json(created, { status: 201 });
+  return ok(created, "视频已创建", 201);
 }

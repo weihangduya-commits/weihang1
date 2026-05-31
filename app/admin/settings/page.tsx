@@ -1,8 +1,5 @@
-import { requireAdminPage } from "@/components/AdminGuard";
-import { AdminSettingsPage } from "@/components/AdminSettingsPage";
+import { AdminSettingsManager } from "@/components/admin/AdminSettingsManager";
 
-export default async function SettingsAdminPage() {
-  await requireAdminPage();
-
-  return <AdminSettingsPage />;
+export default function SettingsAdminPage() {
+  return <AdminSettingsManager />;
 }

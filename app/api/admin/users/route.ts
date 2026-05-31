@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiAuth";
+import { fail, ok } from "@/lib/apiResponse";
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -10,18 +10,27 @@ const createUserSchema = z.object({
   role: z.enum(["admin", "user"]).default("user")
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireAdmin();
 
   if (auth.response) {
     return auth.response;
   }
 
+  const url = new URL(request.url);
+  const query = url.searchParams.get("q")?.trim();
+
   const users = await prisma.user.findMany({
+    where: query
+      ? {
+          email: { contains: query, mode: "insensitive" }
+        }
+      : undefined,
     select: {
       id: true,
       email: true,
       role: true,
+      disabled: true,
       created_at: true,
       _count: {
         select: {
@@ -33,7 +42,7 @@ export async function GET() {
     orderBy: { created_at: "desc" }
   });
 
-  return NextResponse.json(users);
+  return ok(users);
 }
 
 export async function POST(request: Request) {
@@ -46,7 +55,7 @@ export async function POST(request: Request) {
   const parsed = createUserSchema.safeParse(await request.json());
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid user payload" }, { status: 400 });
+    return fail("用户数据不合法", 400, parsed.error.flatten());
   }
 
   const user = await prisma.user.create({
@@ -59,9 +68,10 @@ export async function POST(request: Request) {
       id: true,
       email: true,
       role: true,
+      disabled: true,
       created_at: true
     }
   });
 
-  return NextResponse.json(user, { status: 201 });
+  return ok(user, "用户已创建", 201);
 }

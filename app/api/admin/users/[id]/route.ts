@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiAuth";
+import { fail, ok } from "@/lib/apiResponse";
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(8)
+const updateUserSchema = z.object({
+  password: z.string().min(8).optional(),
+  role: z.enum(["admin", "user"]).optional(),
+  disabled: z.boolean().optional()
 });
 
 export async function DELETE(
@@ -19,12 +21,12 @@ export async function DELETE(
   }
 
   if (params.id === auth.session.user.id) {
-    return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
+    return fail("不能删除当前登录账号", 400);
   }
 
   await prisma.user.delete({ where: { id: params.id } });
 
-  return NextResponse.json({ ok: true });
+  return ok({ id: params.id }, "用户已删除");
 }
 
 export async function PATCH(
@@ -37,18 +39,33 @@ export async function PATCH(
     return auth.response;
   }
 
-  const parsed = resetPasswordSchema.safeParse(await request.json());
+  const parsed = updateUserSchema.safeParse(await request.json());
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid password" }, { status: 400 });
+    return fail("用户数据不合法", 400, parsed.error.flatten());
   }
 
-  await prisma.user.update({
+  if (params.id === auth.session.user.id && parsed.data.disabled) {
+    return fail("不能禁用当前登录账号", 400);
+  }
+
+  const updated = await prisma.user.update({
     where: { id: params.id },
     data: {
-      password_hash: await bcrypt.hash(parsed.data.password, 12)
+      role: parsed.data.role,
+      disabled: parsed.data.disabled,
+      password_hash: parsed.data.password
+        ? await bcrypt.hash(parsed.data.password, 12)
+        : undefined
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      disabled: true,
+      created_at: true
     }
   });
 
-  return NextResponse.json({ ok: true });
+  return ok(updated, "用户已更新");
 }

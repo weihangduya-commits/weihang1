@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(cuid())
-  email            String             @unique
-  password_hash    String
-  role             String             @default("user")
-  created_at       DateTime           @default(now())
-  saved_words      SavedWord[]
+  id                String             @id @default(cuid())
+  email             String             @unique
+  password_hash     String
+  role              String             @default("user")
+  disabled          Boolean            @default(false)
+  created_at        DateTime           @default(now())
+  saved_words       SavedWord[]
   learning_progress LearningProgress[]
 }
 
@@ -21,14 +22,29 @@ model Video {
   id                String             @id @default(cuid())
   title             String
   description       String             @default("")
-  difficulty        String             @default("Beginner")
+  difficulty        String             @default("A1")
   category          String             @default("教育")
+  status            String             @default("draft")
   video_url         String
-  subtitle_url      String
+  subtitle_url      String             @default("")
   published         Boolean            @default(false)
   created_at        DateTime           @default(now())
   updated_at        DateTime           @default(now()) @updatedAt
   learning_progress LearningProgress[]
+  subtitles         Subtitle[]
+}
+
+model Subtitle {
+  id         String   @id @default(cuid())
+  video_id   String?
+  title      String
+  language   String   @default("en")
+  format     String   @default("vtt")
+  content    String
+  file_url   String   @default("")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  video      Video?   @relation(fields: [video_id], references: [id], onDelete: SetNull)
 }
 
 model SavedWord {
@@ -58,10 +74,12 @@ model DictionaryWord {
   id         String   @id @default(cuid())
   word       String   @unique
   phonetic   String
+  audio_url  String   @default("")
   chinese    String
   english    String
   example    String
   forms      String
+  phrases    String   @default("")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }

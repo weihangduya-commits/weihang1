@@ -1,8 +1,5 @@
-import { requireAdminPage } from "@/components/AdminGuard";
-import { AdminVideosPage } from "@/components/AdminVideosPage";
+import { AdminVideosManager } from "@/components/admin/AdminVideosManager";
 
-export default async function VideosAdminPage() {
-  await requireAdminPage();
-
-  return <AdminVideosPage />;
+export default function VideosAdminPage() {
+  return <AdminVideosManager />;
 }

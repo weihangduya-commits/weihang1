@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
           where: { email: parsed.data.email.toLowerCase() }
         });
 
-        if (!user) {
+        if (!user || user.disabled) {
           return null;
         }
 

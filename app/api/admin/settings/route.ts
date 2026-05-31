@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiAuth";
+import { fail, ok } from "@/lib/apiResponse";
 
 const settingsSchema = z.object({
   site_name: z.string().min(1),
@@ -26,7 +26,7 @@ export async function GET() {
     create: { id: "site" }
   });
 
-  return NextResponse.json(settings);
+  return ok(settings);
 }
 
 export async function PATCH(request: Request) {
@@ -39,7 +39,7 @@ export async function PATCH(request: Request) {
   const parsed = settingsSchema.safeParse(await request.json());
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid settings payload" }, { status: 400 });
+    return fail("设置数据不合法", 400, parsed.error.flatten());
   }
 
   const settings = await prisma.setting.upsert({
@@ -51,5 +51,5 @@ export async function PATCH(request: Request) {
     }
   });
 
-  return NextResponse.json(settings);
+  return ok(settings, "设置已保存");
 }

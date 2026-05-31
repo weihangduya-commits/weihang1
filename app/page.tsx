@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import {
@@ -295,10 +296,13 @@ export default function Home() {
       <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           {settings.logo_url ? (
-            <img
+            <Image
               className="h-11 w-11 shrink-0 rounded-2xl object-cover shadow-glow"
               src={settings.logo_url}
               alt={settings.site_name}
+              width={44}
+              height={44}
+              unoptimized
             />
           ) : (
             <div
