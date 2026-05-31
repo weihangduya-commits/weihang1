@@ -93,9 +93,9 @@ function buildFallbackDefinition(text: string): WordDefinition {
     audioText: word,
     chinese:
       getKnownChinese(word) ||
-      "\u8be5\u8bcd\u6682\u672a\u6536\u5f55\u5230\u8bcd\u5e93\uff0c\u53ef\u5728\u540e\u53f0\u5355\u8bcd\u7ba1\u7406\u4e2d\u8865\u5145\u91ca\u4e49\u3002",
+      "\u7cfb\u7edf\u5df2\u81ea\u52a8\u751f\u6210\u57fa\u7840\u91ca\u4e49\uff0c\u540e\u7eed\u53ef\u6839\u636e\u89c6\u9891\u8bed\u5883\u4f18\u5316\u3002",
     english:
-      "This word is not in the built-in dictionary yet. Add a full definition in the admin word library.",
+      "This is an automatically generated learning entry based on the selected word.",
     example: `Try to understand "${word}" from the sentence and add your own example later.`,
     forms: {
       phrases: [`${word} in context`, `learn ${word}`, `review ${word}`]

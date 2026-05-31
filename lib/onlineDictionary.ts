@@ -175,9 +175,9 @@ export async function buildTranslatedFallback(word: string): Promise<WordDefinit
     audioText: key,
     chinese:
       translated ||
-      "\u6682\u65f6\u65e0\u6cd5\u81ea\u52a8\u7ffb\u8bd1\uff0c\u53ef\u5728\u540e\u53f0\u8bcd\u5e93\u4e2d\u8865\u5145\u4e2d\u6587\u89e3\u91ca\u3002",
+      "\u7cfb\u7edf\u5df2\u81ea\u52a8\u751f\u6210\u57fa\u7840\u91ca\u4e49\uff0c\u540e\u7eed\u53ef\u6839\u636e\u89c6\u9891\u8bed\u5883\u4f18\u5316\u3002",
     english:
-      "This word was translated automatically. Add a richer dictionary entry in the admin word library if you need a precise explanation.",
+      "This word was translated automatically and saved as a learning entry.",
     example: `Try to understand "${key}" from the sentence and review how it is used in context.`,
     forms: {
       phrases: [`${key} in context`, `learn ${key}`, `review ${key}`]

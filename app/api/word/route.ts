@@ -7,8 +7,35 @@ import {
 } from "@/lib/onlineDictionary";
 import { requireUser } from "@/lib/apiAuth";
 import { prisma } from "@/lib/prisma";
+import type { WordDefinition } from "@/types";
 
 export const dynamic = "force-dynamic";
+
+async function saveAutoDictionaryEntry(definition: WordDefinition) {
+  const phrases = definition.forms.phrases?.join(", ") ?? "";
+  const { phrases: _phrases, ...formsWithoutPhrases } = definition.forms;
+
+  await prisma.dictionaryWord.upsert({
+    where: { word: definition.word.toLowerCase() },
+    update: {
+      phonetic: definition.phonetic,
+      chinese: definition.chinese,
+      english: definition.english,
+      example: definition.example,
+      forms: JSON.stringify(formsWithoutPhrases),
+      phrases
+    },
+    create: {
+      word: definition.word.toLowerCase(),
+      phonetic: definition.phonetic,
+      chinese: definition.chinese,
+      english: definition.english,
+      example: definition.example,
+      forms: JSON.stringify(formsWithoutPhrases),
+      phrases
+    }
+  });
+}
 
 export async function GET(request: Request) {
   const auth = await requireUser();
@@ -51,7 +78,8 @@ export async function GET(request: Request) {
 
   const localDefinition = getMockWordDefinition(text);
 
-  if (!localDefinition.english.startsWith("This word is not in the built-in dictionary")) {
+  if (!localDefinition.english.startsWith("This is an automatically generated")) {
+    await saveAutoDictionaryEntry(localDefinition).catch(() => undefined);
     return NextResponse.json(localDefinition);
   }
 
@@ -61,8 +89,11 @@ export async function GET(request: Request) {
     if (getKnownChinese(word)) {
       onlineDefinition.chinese = getKnownChinese(word);
     }
+    await saveAutoDictionaryEntry(onlineDefinition).catch(() => undefined);
     return NextResponse.json(onlineDefinition);
   }
 
-  return NextResponse.json(await buildTranslatedFallback(word));
+  const translatedFallback = await buildTranslatedFallback(word);
+  await saveAutoDictionaryEntry(translatedFallback).catch(() => undefined);
+  return NextResponse.json(translatedFallback);
 }
