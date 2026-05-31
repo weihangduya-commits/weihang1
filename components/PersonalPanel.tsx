@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { BookOpenCheck, Headphones, UserRound } from "lucide-react";
+import { getDailyLesson } from "@/lib/dailyLearning";
 
 type PersonalPanelProps = {
   savedCount: number;
@@ -8,32 +10,13 @@ type PersonalPanelProps = {
   onPracticeWord: (word: string) => void;
 };
 
-const dailySentences = [
-  "Could you say that again?",
-  "I am working on my English.",
-  "That sounds good to me.",
-  "Let me think about it.",
-  "What do you usually do after work?"
-];
-
-const practiceWords = [
-  "curiosity",
-  "language",
-  "rhythm",
-  "practice",
-  "notice",
-  "memory",
-  "listen",
-  "repeat",
-  "context",
-  "confidence"
-];
-
 export function PersonalPanel({
   savedCount,
   onOpenVocabulary,
   onPracticeWord
 }: PersonalPanelProps) {
+  const dailyLesson = useMemo(() => getDailyLesson(), []);
+
   function speak(text: string) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -50,7 +33,9 @@ export function PersonalPanel({
         </div>
         <div className="min-w-0">
           <h2 className="font-semibold text-white">个人学习</h2>
-          <p className="truncate text-sm text-mist">生词复习与每日听力</p>
+          <p className="truncate text-sm text-mist">
+            每日更新 · {dailyLesson.dateKey}
+          </p>
         </div>
       </div>
 
@@ -70,10 +55,10 @@ export function PersonalPanel({
 
         <div className="rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/10">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-lime">
-            Word Drill
+            Daily Word Drill
           </p>
           <div className="flex flex-wrap gap-2">
-            {practiceWords.map((word) => (
+            {dailyLesson.words.map((word) => (
               <button
                 key={word}
                 className="rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-lime hover:text-ink"
@@ -91,7 +76,7 @@ export function PersonalPanel({
             Daily Listening
           </div>
           <div className="space-y-2">
-            {dailySentences.map((sentence) => (
+            {dailyLesson.sentences.map((sentence) => (
               <button
                 key={sentence}
                 className="w-full rounded-xl bg-white/[0.04] px-3 py-2 text-left text-xs leading-5 text-mist transition hover:bg-white/[0.08] hover:text-white"

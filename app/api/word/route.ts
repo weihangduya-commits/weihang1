@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getMockWordDefinition } from "@/lib/mockDictionary";
+import { fetchOnlineWordDefinition } from "@/lib/onlineDictionary";
 import { requireUser } from "@/lib/apiAuth";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const auth = await requireUser();
@@ -40,6 +43,12 @@ export async function GET(request: Request) {
           : JSON.parse(dictionaryWord.forms || "{}").phrases ?? []
       }
     });
+  }
+
+  const onlineDefinition = await fetchOnlineWordDefinition(word).catch(() => null);
+
+  if (onlineDefinition) {
+    return NextResponse.json(onlineDefinition);
   }
 
   return NextResponse.json(getMockWordDefinition(text));
