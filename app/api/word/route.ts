@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getMockWordDefinition } from "@/lib/mockDictionary";
-import { fetchOnlineWordDefinition, getKnownChinese } from "@/lib/onlineDictionary";
+import {
+  buildTranslatedFallback,
+  fetchOnlineWordDefinition,
+  getKnownChinese
+} from "@/lib/onlineDictionary";
 import { requireUser } from "@/lib/apiAuth";
 import { prisma } from "@/lib/prisma";
 
@@ -60,5 +64,5 @@ export async function GET(request: Request) {
     return NextResponse.json(onlineDefinition);
   }
 
-  return NextResponse.json(localDefinition);
+  return NextResponse.json(await buildTranslatedFallback(word));
 }
