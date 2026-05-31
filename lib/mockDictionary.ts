@@ -2,6 +2,18 @@ import type { WordDefinition } from "@/types";
 import { normalizeWord } from "@/lib/subtitleParser";
 
 const dictionary: Record<string, WordDefinition> = {
+  context: {
+    word: "context",
+    phonetic: "/ˈkɑːntekst/",
+    audioText: "context",
+    chinese: "上下文；语境；背景",
+    english: "The situation, text, or information around something that helps you understand its meaning.",
+    example: "You can guess many new words from the context of the sentence.",
+    forms: {
+      plural: "contexts",
+      phrases: ["in context", "cultural context", "understand the context"]
+    }
+  },
   curiosity: {
     word: "curiosity",
     phonetic: "/ˌkjʊriˈɑːsəti/",
@@ -19,7 +31,7 @@ const dictionary: Record<string, WordDefinition> = {
     phonetic: "/ˈlæŋɡwɪdʒ/",
     audioText: "language",
     chinese: "语言；表达方式",
-    english: "A system of communication used by a country or community.",
+    english: "A system of communication used by a country, community, or group of people.",
     example: "Video gives language a real voice and rhythm.",
     forms: {
       plural: "languages",
@@ -70,26 +82,25 @@ const dictionary: Record<string, WordDefinition> = {
   }
 };
 
+function buildFallbackDefinition(text: string): WordDefinition {
+  const key = normalizeWord(text);
+  const word = key || text.trim();
+
+  return {
+    word,
+    phonetic: "",
+    audioText: word,
+    chinese: "该词暂未收录到词库，可在后台单词管理中补充释义。",
+    english:
+      "This word is not in the built-in dictionary yet. Add a full definition in the admin word library.",
+    example: `Try to understand "${word}" from the sentence and add your own example later.`,
+    forms: {
+      phrases: [`${word} in context`, `learn ${word}`, `review ${word}`]
+    }
+  };
+}
+
 export function getMockWordDefinition(text: string): WordDefinition {
   const key = normalizeWord(text);
-
-  return (
-    dictionary[key] ?? {
-      word: key || text,
-      phonetic: "/ˈlɜːrnɪŋ/",
-      audioText: key || text,
-      chinese: "模拟释义：与视频语境相关的英文词汇",
-      english:
-        "Mock dictionary data for the MVP. Replace this with a real dictionary API later.",
-      example: `Try repeating "${key || text}" aloud and then use it in your own sentence.`,
-      forms: {
-        plural: `${key}s`,
-        pastTense: `${key}ed`,
-        pastParticiple: `${key}ed`,
-        presentParticiple: `${key}ing`,
-        thirdPerson: `${key}s`,
-        phrases: [`learn ${key}`, `${key} in context`, `remember ${key}`]
-      }
-    }
-  );
+  return dictionary[key] ?? buildFallbackDefinition(text);
 }

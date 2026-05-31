@@ -3,6 +3,27 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+const words = [
+  {
+    word: "curiosity",
+    phonetic: "/ˌkjʊriˈɑːsəti/",
+    chinese: "好奇心；求知欲",
+    english: "A strong desire to know or learn something.",
+    example: "Curiosity helps learners notice patterns in a new language.",
+    forms: { plural: "curiosities" },
+    phrases: "spark curiosity, natural curiosity"
+  },
+  {
+    word: "context",
+    phonetic: "/ˈkɑːntekst/",
+    chinese: "上下文；语境；背景",
+    english: "The situation, text, or information around something that helps you understand its meaning.",
+    example: "You can guess many new words from the context of the sentence.",
+    forms: { plural: "contexts" },
+    phrases: "in context, cultural context, understand the context"
+  }
+];
+
 async function main() {
   const adminEmail = (process.env.ADMIN_EMAIL || "admin@example.com").toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123456";
@@ -45,22 +66,28 @@ async function main() {
     create: { id: "site" }
   });
 
-  await prisma.dictionaryWord.upsert({
-    where: { word: "curiosity" },
-    update: {},
-    create: {
-      word: "curiosity",
-      phonetic: "/ˌkjʊriˈɑːsəti/",
-      chinese: "好奇心；求知欲",
-      english: "A strong desire to know or learn something.",
-      example: "Curiosity helps learners notice patterns in a new language.",
-      forms: JSON.stringify({
-        plural: "curiosities",
-        phrases: ["spark curiosity", "natural curiosity"]
-      }),
-      phrases: "spark curiosity, natural curiosity"
-    }
-  });
+  for (const item of words) {
+    await prisma.dictionaryWord.upsert({
+      where: { word: item.word },
+      update: {
+        phonetic: item.phonetic,
+        chinese: item.chinese,
+        english: item.english,
+        example: item.example,
+        forms: JSON.stringify(item.forms),
+        phrases: item.phrases
+      },
+      create: {
+        word: item.word,
+        phonetic: item.phonetic,
+        chinese: item.chinese,
+        english: item.english,
+        example: item.example,
+        forms: JSON.stringify(item.forms),
+        phrases: item.phrases
+      }
+    });
+  }
 }
 
 main()
