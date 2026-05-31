@@ -1,4 +1,5 @@
 import type { WordDefinition, WordForms } from "@/types";
+import { translateEnglishToChinese } from "@/lib/translation";
 
 type FreeDictionaryMeaning = {
   partOfSpeech?: string;
@@ -63,6 +64,7 @@ export const commonChinese: Record<string, string> = {
   understand: "\u7406\u89e3",
   useful: "\u6709\u7528\u7684",
   video: "\u89c6\u9891",
+  with: "\u548c\u2026\u2026\u4e00\u8d77\uff1b\u5177\u6709\uff1b\u7528",
   word: "\u5355\u8bcd\uff1b\u8bcd\u8bed"
 };
 
@@ -70,11 +72,6 @@ function buildForms(word: string): WordForms {
   const base = word.toLowerCase();
 
   return {
-    plural: base.endsWith("s") ? `${base}es` : `${base}s`,
-    pastTense: base.endsWith("e") ? `${base}d` : `${base}ed`,
-    pastParticiple: base.endsWith("e") ? `${base}d` : `${base}ed`,
-    presentParticiple: base.endsWith("e") ? `${base.slice(0, -1)}ing` : `${base}ing`,
-    thirdPerson: base.endsWith("s") ? `${base}es` : `${base}s`,
     phrases: [`${base} in context`, `learn ${base}`, `use ${base} correctly`]
   };
 }
@@ -122,14 +119,19 @@ export async function fetchOnlineWordDefinition(
   }
 
   const { english, example } = pickDefinition(entry);
+  const knownChinese = getKnownChinese(key);
+  const translatedChinese = knownChinese
+    ? ""
+    : await translateEnglishToChinese(english).catch(() => "");
 
   return {
     word: entry.word || key,
     phonetic: pickPhonetic(entry),
     audioText: entry.word || key,
     chinese:
-      getKnownChinese(key) ||
-      "\u4e2d\u6587\u91ca\u4e49\u5f85\u8865\u5145\uff1b\u7ba1\u7406\u5458\u53ef\u5728\u540e\u53f0\u8bcd\u5e93\u4e2d\u6dfb\u52a0\u66f4\u51c6\u786e\u7684\u4e2d\u6587\u89e3\u91ca\u3002",
+      knownChinese ||
+      translatedChinese ||
+      "\u6682\u65f6\u65e0\u6cd5\u81ea\u52a8\u7ffb\u8bd1\uff0c\u53ef\u5728\u540e\u53f0\u8bcd\u5e93\u4e2d\u8865\u5145\u4e2d\u6587\u89e3\u91ca\u3002",
     english,
     example,
     forms: buildForms(entry.word || key)
